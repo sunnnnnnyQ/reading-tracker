@@ -1,0 +1,1202 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>🦁 Leo英语启蒙打卡</title>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+/* ===== Design Tokens (Educational App Palette) ===== */
+:root {
+  --primary: #6366F1; --primary-light: #EEF2FF; --primary-dark: #4338CA;
+  --accent: #F97316; --accent-light: #FFF7ED;
+  --green: #10B981; --green-light: #ECFDF5;
+  --red: #EF4444; --red-light: #FEF2F2;
+  --bg: #F8FAFC; --card: #FFFFFF;
+  --text: #1E1B4B; --text-secondary: #6B7280; --text-tertiary: #9CA3AF;
+  --border: #E0E7FF; --border-light: #F1F5F9;
+  --shadow: 0 1px 3px rgba(99,102,241,0.08), 0 1px 2px rgba(0,0,0,0.04);
+  --shadow-md: 0 4px 12px rgba(99,102,241,0.1), 0 2px 4px rgba(0,0,0,0.04);
+  --radius: 16px; --radius-sm: 10px; --radius-full: 9999px;
+}
+
+/* ===== Reset & Base ===== */
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; -webkit-tap-highlight-color: transparent; }
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  background: var(--bg); color: var(--text); min-height: 100dvh;
+  overscroll-behavior: contain; touch-action: manipulation;
+}
+button { font-family: inherit; cursor: pointer; border: none; background: none; }
+input { font-family: inherit; }
+
+/* ===== Layout ===== */
+.app { max-width: 480px; margin: 0 auto; min-height: 100dvh; display: flex; flex-direction: column; }
+.main { flex: 1; padding: 0 16px 100px; }
+
+/* ===== Header ===== */
+.header {
+  position: sticky; top: 0; z-index: 50;
+  background: linear-gradient(135deg, var(--primary) 0%, #818CF8 100%);
+  padding: 12px 16px 14px; color: #fff;
+}
+.header-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+.header h1 { font-size: 18px; font-weight: 700; letter-spacing: -0.02em; }
+.sync-badge {
+  font-size: 11px; padding: 3px 10px; border-radius: var(--radius-full);
+  background: rgba(255,255,255,0.2); backdrop-filter: blur(4px);
+  transition: all 0.3s;
+}
+.sync-badge.synced { background: rgba(16,185,129,0.3); }
+.sync-badge.error { background: rgba(239,68,68,0.3); }
+
+/* Week nav */
+.week-nav { display: flex; align-items: center; justify-content: center; gap: 12px; }
+.week-nav button {
+  width: 32px; height: 32px; border-radius: var(--radius-full);
+  background: rgba(255,255,255,0.2); color: #fff; font-size: 14px;
+  display: flex; align-items: center; justify-content: center;
+  transition: background 0.2s;
+}
+.week-nav button:active { background: rgba(255,255,255,0.35); }
+.week-label { font-size: 13px; font-weight: 500; opacity: 0.9; min-width: 160px; text-align: center; }
+
+/* ===== Day Tabs ===== */
+.day-tabs {
+  display: flex; gap: 4px; padding: 10px 16px;
+  background: var(--card); border-bottom: 1px solid var(--border-light);
+  overflow-x: auto; scrollbar-width: none; -ms-overflow-style: none;
+}
+.day-tabs::-webkit-scrollbar { display: none; }
+.day-tab {
+  flex: 1; min-width: 44px; padding: 6px 2px; border-radius: var(--radius-sm);
+  display: flex; flex-direction: column; align-items: center; gap: 2px;
+  transition: all 0.2s; font-size: 11px; color: var(--text-tertiary); font-weight: 500;
+}
+.day-tab .day-name { font-size: 10px; }
+.day-tab .day-num { font-size: 16px; font-weight: 600; line-height: 1.2; }
+.day-tab.active {
+  background: var(--primary); color: #fff;
+  box-shadow: 0 2px 8px rgba(99,102,241,0.3);
+}
+.day-tab:active { transform: scale(0.95); }
+.day-tab .dot {
+  width: 4px; height: 4px; border-radius: 50%;
+  background: var(--accent); margin-top: 2px; opacity: 0;
+}
+.day-tab.has-data .dot { opacity: 1; }
+.day-tab.active .dot { background: #fff; }
+
+/* ===== Stage Banner ===== */
+.stage-banner {
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  padding: 8px 16px; margin-top: 12px;
+  background: var(--primary-light); border-radius: var(--radius-sm);
+  font-size: 12px; color: var(--text-secondary);
+}
+.stage-badge {
+  padding: 2px 10px; border-radius: var(--radius-full);
+  font-weight: 700; font-size: 11px; color: #fff;
+}
+
+/* ===== Time Section ===== */
+.time-section {
+  margin-top: 16px; display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
+}
+.time-card {
+  background: var(--card); border-radius: var(--radius); padding: 14px;
+  box-shadow: var(--shadow); text-align: center;
+  border: 2px solid transparent; transition: border-color 0.2s;
+}
+.time-card:active { border-color: var(--primary-light); }
+.time-card .time-icon { font-size: 22px; margin-bottom: 4px; }
+.time-card .time-label { font-size: 11px; color: var(--text-tertiary); font-weight: 500; margin-bottom: 4px; }
+.time-card .time-value {
+  font-size: 28px; font-weight: 800; color: var(--primary);
+  line-height: 1.1; letter-spacing: -0.03em;
+}
+.time-card .time-unit { font-size: 12px; font-weight: 500; color: var(--text-tertiary); }
+.time-presets {
+  display: flex; flex-wrap: wrap; gap: 5px; margin-top: 10px; justify-content: center;
+}
+.time-preset {
+  min-width: 32px; height: 26px; border-radius: var(--radius-full);
+  font-size: 11px; font-weight: 600; display: flex; align-items: center; justify-content: center;
+  transition: all 0.15s; padding: 0 6px;
+}
+.time-preset.add {
+  background: var(--primary-light); color: var(--primary);
+}
+.time-preset.add:active { background: var(--primary); color: #fff; transform: scale(0.95); }
+.time-preset.sub {
+  background: var(--red-light); color: var(--red);
+}
+.time-preset.sub:active { background: var(--red); color: #fff; transform: scale(0.95); }
+.time-preset.set {
+  background: var(--accent-light); color: var(--accent); font-size: 11px;
+}
+.time-preset.set:active { background: var(--accent); color: #fff; transform: scale(0.95); }
+
+/* ===== Books Section ===== */
+.section { margin-top: 14px; }
+.section-header {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 8px;
+}
+.section-title { font-size: 14px; font-weight: 700; display: flex; align-items: center; gap: 6px; }
+.section-title .emoji { font-size: 16px; }
+.section-count { font-size: 11px; color: var(--text-tertiary); font-weight: 500; }
+
+.book-chips {
+  display: flex; flex-wrap: wrap; gap: 6px; min-height: 36px;
+  background: var(--card); border-radius: var(--radius); padding: 10px;
+  box-shadow: var(--shadow);
+}
+.book-chip {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 6px 12px; border-radius: var(--radius-full);
+  font-size: 13px; font-weight: 500;
+  transition: all 0.15s; animation: chipIn 0.2s ease-out;
+}
+@keyframes chipIn { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+.book-chip.graded { background: var(--primary-light); color: var(--primary-dark); }
+.book-chip.choice { background: var(--accent-light); color: #9A3412; }
+.book-chip .del {
+  width: 18px; height: 18px; border-radius: 50%; display: flex;
+  align-items: center; justify-content: center; font-size: 12px;
+  background: rgba(0,0,0,0.08); transition: background 0.15s;
+}
+.book-chip .del:active { background: var(--red); color: #fff; }
+
+.add-book-row {
+  display: flex; gap: 6px; margin-top: 8px;
+}
+.add-book-input {
+  flex: 1; height: 40px; border: 2px solid var(--border);
+  border-radius: var(--radius-sm); padding: 0 12px; font-size: 13px;
+  outline: none; transition: border-color 0.2s; background: var(--card);
+}
+.add-book-input:focus { border-color: var(--primary); }
+.add-book-input::placeholder { color: var(--text-tertiary); }
+.add-book-btn {
+  height: 40px; padding: 0 16px; border-radius: var(--radius-sm);
+  font-size: 13px; font-weight: 600; transition: all 0.15s;
+}
+.add-book-btn.graded { background: var(--primary); color: #fff; }
+.add-book-btn.graded:active { background: var(--primary-dark); }
+.add-book-btn.choice { background: var(--accent); color: #fff; }
+.add-book-btn.choice:active { background: #EA580C; }
+
+/* Recent books */
+.recent-books { margin-top: 6px; display: flex; flex-wrap: wrap; gap: 4px; }
+.recent-chip {
+  padding: 4px 10px; border-radius: var(--radius-full);
+  font-size: 11px; font-weight: 500; color: var(--text-secondary);
+  background: var(--border-light); transition: all 0.15s;
+}
+.recent-chip:active { background: var(--primary-light); color: var(--primary); transform: scale(0.95); }
+
+/* ===== Mood Section ===== */
+.mood-section { margin-top: 14px; }
+.mood-row { display: flex; gap: 10px; justify-content: center; }
+.mood-btn {
+  width: 64px; height: 64px; border-radius: var(--radius);
+  font-size: 32px; display: flex; align-items: center; justify-content: center;
+  background: var(--card); box-shadow: var(--shadow);
+  transition: all 0.2s; border: 2px solid transparent;
+}
+.mood-btn.active {
+  border-color: var(--primary); background: var(--primary-light);
+  transform: scale(1.08); box-shadow: var(--shadow-md);
+}
+.mood-btn:active { transform: scale(0.92); }
+
+/* ===== Note Section ===== */
+.note-section { margin-top: 14px; }
+.note-input {
+  width: 100%; height: 44px; border: 2px solid var(--border);
+  border-radius: var(--radius-sm); padding: 0 14px; font-size: 13px;
+  outline: none; transition: border-color 0.2s; background: var(--card);
+}
+.note-input:focus { border-color: var(--primary); }
+.note-input::placeholder { color: var(--text-tertiary); }
+
+/* ===== Bottom Bar ===== */
+.bottom-bar {
+  position: fixed; bottom: 0; left: 0; right: 0; z-index: 50;
+  background: var(--card); border-top: 1px solid var(--border-light);
+  padding: 8px 16px; padding-bottom: max(8px, env(safe-area-inset-bottom));
+  display: flex; justify-content: space-around; align-items: center;
+  box-shadow: 0 -2px 10px rgba(0,0,0,0.04);
+}
+.bottom-btn {
+  display: flex; flex-direction: column; align-items: center; gap: 2px;
+  padding: 6px 12px; border-radius: var(--radius-sm);
+  font-size: 10px; font-weight: 500; color: var(--text-secondary);
+  transition: all 0.15s; min-width: 56px;
+}
+.bottom-btn .icon { font-size: 20px; }
+.bottom-btn:active { background: var(--primary-light); color: var(--primary); }
+.bottom-btn.active { color: var(--primary); }
+
+/* (Stats modal styles removed - replaced by Dashboard) */
+
+/* ===== Empty State ===== */
+.empty-hint {
+  text-align: center; padding: 8px; font-size: 12px; color: var(--text-tertiary);
+}
+
+/* ===== Desktop Enhancement ===== */
+@media (min-width: 640px) {
+  .app { max-width: 480px; margin: 20px auto; border-radius: var(--radius);
+    box-shadow: var(--shadow-md); overflow: hidden; min-height: auto; }
+  .header { border-radius: var(--radius) var(--radius) 0 0; }
+  .bottom-bar { position: sticky; border-radius: 0 0 var(--radius) var(--radius); }
+}
+
+/* ===== Reduced Motion ===== */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+}
+
+/* ===== Dashboard ===== */
+.dashboard { padding: 0 16px 100px; display: none; }
+.dashboard.active { display: block; }
+.main.hidden { display: none; }
+.day-tabs.hidden { display: none; }
+
+.dash-period-tabs {
+  display: flex; gap: 0; margin: 12px 0; background: var(--border-light);
+  border-radius: var(--radius-sm); padding: 3px;
+}
+.dash-period-tab {
+  flex: 1; padding: 8px 0; border-radius: 8px; font-size: 13px; font-weight: 600;
+  text-align: center; color: var(--text-secondary); transition: all 0.2s;
+}
+.dash-period-tab.active { background: var(--card); color: var(--primary); box-shadow: var(--shadow); }
+.dash-period-tab:active { transform: scale(0.96); }
+
+.dash-summary {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px;
+}
+.dash-stat {
+  background: var(--card); border-radius: var(--radius); padding: 16px;
+  box-shadow: var(--shadow); text-align: center;
+}
+.dash-stat .icon { font-size: 20px; margin-bottom: 4px; }
+.dash-stat .val { font-size: 26px; font-weight: 800; letter-spacing: -0.03em; line-height: 1.2; }
+.dash-stat .unit { font-size: 12px; font-weight: 500; }
+.dash-stat .lbl { font-size: 11px; color: var(--text-tertiary); font-weight: 500; margin-top: 2px; }
+
+.dash-section {
+  background: var(--card); border-radius: var(--radius); padding: 16px;
+  box-shadow: var(--shadow); margin-bottom: 12px;
+}
+.dash-section-title {
+  font-size: 14px; font-weight: 700; margin-bottom: 12px;
+  display: flex; align-items: center; gap: 6px;
+}
+
+/* Book frequency list */
+.book-freq-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 8px 0; border-bottom: 1px solid var(--border-light);
+}
+.book-freq-item:last-child { border-bottom: none; }
+.book-freq-rank {
+  width: 22px; height: 22px; border-radius: 6px; font-size: 11px; font-weight: 700;
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+.book-freq-rank.top1 { background: #FEF3C7; color: #D97706; }
+.book-freq-rank.top2 { background: #E5E7EB; color: #6B7280; }
+.book-freq-rank.top3 { background: #FDE8D8; color: #C2410C; }
+.book-freq-rank.normal { background: var(--border-light); color: var(--text-tertiary); }
+.book-freq-name { flex: 1; font-size: 13px; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.book-freq-count { font-size: 12px; font-weight: 600; color: var(--primary); flex-shrink: 0; }
+.book-freq-bar-bg { flex: 1; height: 6px; background: var(--border-light); border-radius: 3px; overflow: hidden; max-width: 80px; }
+.book-freq-bar { height: 100%; border-radius: 3px; background: var(--primary); transition: width 0.5s ease-out; }
+
+/* Activity chart */
+.activity-chart { display: flex; align-items: flex-end; gap: 3px; height: 80px; margin-top: 4px; }
+.activity-bar-wrap {
+  flex: 1; display: flex; flex-direction: column; align-items: center; gap: 3px; height: 100%;
+}
+.activity-bar-container { flex: 1; width: 100%; display: flex; align-items: flex-end; justify-content: center; }
+.activity-bar {
+  width: 80%; border-radius: 4px 4px 0 0; min-height: 2px;
+  transition: height 0.5s ease-out;
+}
+.activity-bar.listening { background: var(--primary); }
+.activity-bar.reading { background: var(--accent); }
+.activity-bar-label { font-size: 9px; color: var(--text-tertiary); font-weight: 500; }
+.activity-legend { display: flex; gap: 16px; margin-top: 8px; justify-content: center; }
+.activity-legend span { font-size: 11px; color: var(--text-secondary); display: flex; align-items: center; gap: 4px; }
+.legend-dot { width: 8px; height: 8px; border-radius: 2px; }
+
+/* Streak card */
+.streak-card {
+  display: flex; align-items: center; gap: 16px; padding: 16px;
+  background: linear-gradient(135deg, var(--primary) 0%, #818CF8 100%);
+  border-radius: var(--radius); color: #fff; margin-bottom: 16px;
+  box-shadow: var(--shadow-md);
+}
+.streak-num { font-size: 36px; font-weight: 800; line-height: 1; }
+.streak-label { font-size: 12px; opacity: 0.8; }
+.streak-detail { font-size: 11px; opacity: 0.7; margin-top: 2px; }
+
+/* Mood distribution */
+.mood-dist { display: flex; gap: 12px; justify-content: center; margin-top: 8px; }
+.mood-dist-item { text-align: center; }
+.mood-dist-emoji { font-size: 24px; }
+.mood-dist-pct { font-size: 12px; font-weight: 600; color: var(--primary); margin-top: 2px; }
+.mood-dist-lbl { font-size: 10px; color: var(--text-tertiary); }
+
+</style>
+</head>
+<body>
+<div class="app">
+  <!-- Header -->
+  <div class="header" id="appHeader">
+    <div class="header-top">
+      <h1>🦁 Leo英语启蒙</h1>
+      <div id="syncBadge" class="sync-badge">⟳ 连接中</div>
+    </div>
+    <div class="week-nav" id="headerNav">
+      <button onclick="changeWeek(-1)">◀</button>
+      <span id="weekLabel" class="week-label"></span>
+      <button onclick="changeWeek(1)">▶</button>
+    </div>
+  </div>
+
+  <!-- Day Tabs -->
+  <div id="dayTabs" class="day-tabs"></div>
+
+  <!-- Main Content -->
+  <div class="main" id="mainContent"></div>
+
+  <!-- Dashboard -->
+  <div class="dashboard" id="dashboard"></div>
+
+  <!-- Bottom Bar -->
+  <div class="bottom-bar">
+    <button class="bottom-btn active" id="tabTracker" onclick="switchView('tracker')"><span class="icon">📅</span>打卡</button>
+    <button class="bottom-btn" id="tabDashboard" onclick="switchView('dashboard')"><span class="icon">📊</span>看板</button>
+  </div>
+</div>
+
+<!-- (Stats modal removed - replaced by Dashboard tab) -->
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+/* ===== Supabase ===== */
+const SUPABASE_URL = 'https://scenefpgnekvmyroffet.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNjZW5lZnBnbmVrdm15cm9mZmV0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk5NDk3MTYsImV4cCI6MjA5NTUyNTcxNn0.gHJvEakP00OBUgEZuAFcLiAix__cv519Qn2xErcXl3k';
+const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+/* ===== Constants ===== */
+const STORAGE_KEY = 'leo-reading-tracker';
+const STAGES = [
+  { name: '入门期', months: '1-2月', color: '#F59E0B' },
+  { name: '一段期', months: '3-5月', color: '#10B981' },
+  { name: '二段期', months: '6-9月', color: '#3B82F6' },
+  { name: '三段期', months: '10-15月', color: '#8B5CF6' },
+  { name: '四段期', months: '16-24月', color: '#EC4899' }
+];
+const START_DATE = new Date(2026, 5, 1);
+const DAYS_SHORT = ['日','一','二','三','四','五','六'];
+const RECENT_KEY = 'leo-recent-books';
+
+let currentWeekStart = getMonday(new Date());
+let selectedDay = fmtKey(new Date());
+let cloudSaveTimer = null;
+
+/* ===== Dashboard State ===== */
+let currentView = 'tracker'; // 'tracker' | 'dashboard'
+let dashPeriod = 'week'; // 'week' | 'month' | 'quarter' | 'year'
+let dashDate = new Date(); // reference date for dashboard period
+let dashDataCache = null;
+
+/* ===== Utility ===== */
+function getMonday(d) {
+  const date = new Date(d);
+  const day = date.getDay();
+  const diff = date.getDate() - day + (day === 0 ? -6 : 1);
+  date.setDate(diff); date.setHours(0,0,0,0);
+  return date;
+}
+function fmt(d) { return `${d.getMonth()+1}/${d.getDate()}`; }
+function fmtKey(d) { return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; }
+function todayKey() { return fmtKey(new Date()); }
+
+/* ===== Local Storage ===== */
+function loadLocal() { try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {}; } catch { return {}; } }
+function saveLocal(data) { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); }
+function getRecentBooks() { try { return JSON.parse(localStorage.getItem(RECENT_KEY)) || []; } catch { return []; } }
+function addRecentBook(name) {
+  if (!name || !name.trim()) return;
+  const recent = getRecentBooks().filter(b => b !== name.trim());
+  recent.unshift(name.trim());
+  localStorage.setItem(RECENT_KEY, JSON.stringify(recent.slice(0, 12)));
+}
+
+/* ===== Cloud Sync ===== */
+function updateSyncUI(state) {
+  const el = document.getElementById('syncBadge');
+  if (!el) return;
+  const map = {
+    syncing: { text: '⟳ 同步中', cls: '' },
+    synced:  { text: '✓ 已同步', cls: 'synced' },
+    error:   { text: '✗ 离线', cls: 'error' }
+  };
+  const s = map[state] || map.syncing;
+  el.className = `sync-badge ${s.cls}`;
+  el.textContent = s.text;
+}
+
+async function fetchWeekFromCloud(weekStart) {
+  const dates = [];
+  for (let i = 0; i < 7; i++) {
+    const d = new Date(weekStart); d.setDate(d.getDate() + i); dates.push(fmtKey(d));
+  }
+  const { data, error } = await db.from('reading_records').select('*').in('date', dates);
+  if (error) throw error;
+  return data || [];
+}
+
+async function saveToCloud(key, dayData) {
+  const record = {
+    date: key, listening: parseInt(dayData.listening) || 0,
+    reading_time: parseInt(dayData.readingTime) || 0,
+    graded: dayData.graded || [], choice: dayData.choice || [],
+    mood: dayData.mood || '', note: dayData.note || '',
+    updated_at: new Date().toISOString()
+  };
+  const { error } = await db.from('reading_records').upsert(record, { onConflict: 'date' });
+  if (error) throw error;
+}
+
+async function migrateLocalToCloud() {
+  const local = loadLocal();
+  const keys = Object.keys(local).filter(k => {
+    const d = local[k];
+    return d && (d.listening || d.readingTime || (d.graded && d.graded.some(b => b && b.trim())) || (d.choice && d.choice.some(b => b && b.trim())));
+  });
+  if (!keys.length) return;
+  for (const key of keys) { try { await saveToCloud(key, local[key]); } catch (e) { console.warn('迁移:', e); } }
+}
+
+function cloudSync(key, dayData) {
+  clearTimeout(cloudSaveTimer);
+  updateSyncUI('syncing');
+  cloudSaveTimer = setTimeout(async () => {
+    try { await saveToCloud(key, dayData); updateSyncUI('synced'); }
+    catch (e) { console.error(e); updateSyncUI('error'); }
+  }, 800);
+}
+
+/* ===== Stage ===== */
+function getStage() {
+  const now = new Date();
+  const m = (now.getFullYear() - START_DATE.getFullYear()) * 12 + (now.getMonth() - START_DATE.getMonth());
+  if (m < 2) return STAGES[0]; if (m < 5) return STAGES[1];
+  if (m < 9) return STAGES[2]; if (m < 15) return STAGES[3];
+  return STAGES[4];
+}
+
+/* ===== Navigation ===== */
+function changeWeek(dir) {
+  currentWeekStart = new Date(currentWeekStart);
+  currentWeekStart.setDate(currentWeekStart.getDate() + dir * 7);
+  // Auto-select Monday of new week (or today if in this week)
+  const today = todayKey();
+  let found = false;
+  for (let i = 0; i < 7; i++) {
+    const d = new Date(currentWeekStart); d.setDate(d.getDate() + i);
+    if (fmtKey(d) === today) { selectedDay = today; found = true; break; }
+  }
+  if (!found) selectedDay = fmtKey(currentWeekStart);
+  render();
+}
+function goToday() {
+  currentWeekStart = getMonday(new Date());
+  selectedDay = todayKey();
+  render();
+}
+
+/* ===== Render ===== */
+async function render() {
+  renderWeekNav();
+  renderDayTabs();
+
+  // Local first
+  renderDayContent();
+  updateSyncUI('syncing');
+
+  // Cloud sync
+  try {
+    const cloudData = await fetchWeekFromCloud(currentWeekStart);
+    if (cloudData.length) {
+      const local = loadLocal();
+      cloudData.forEach(r => {
+        local[r.date] = {
+          listening: String(r.listening || ''), readingTime: String(r.reading_time || ''),
+          graded: r.graded?.length ? r.graded : [''], choice: r.choice?.length ? r.choice : [''],
+          mood: r.mood || '', note: r.note || ''
+        };
+      });
+      saveLocal(local);
+      renderDayContent();
+    }
+    updateSyncUI('synced');
+  } catch (e) { console.error(e); updateSyncUI('error'); }
+}
+
+function renderWeekNav() {
+  const weekEnd = new Date(currentWeekStart); weekEnd.setDate(weekEnd.getDate() + 6);
+  document.getElementById('weekLabel').textContent =
+    `${currentWeekStart.getMonth()+1}月${currentWeekStart.getDate()}日 — ${weekEnd.getMonth()+1}月${weekEnd.getDate()}日`;
+}
+
+function renderDayTabs() {
+  const container = document.getElementById('dayTabs');
+  const allData = loadLocal();
+  const today = todayKey();
+  let html = '';
+
+  for (let i = 0; i < 7; i++) {
+    const d = new Date(currentWeekStart); d.setDate(d.getDate() + i);
+    const key = fmtKey(d);
+    const dd = allData[key];
+    const hasData = dd && (parseInt(dd.listening) || parseInt(dd.readingTime) ||
+      (dd.graded && dd.graded.some(b => b && b.trim())) || (dd.choice && dd.choice.some(b => b && b.trim())));
+    const isActive = key === selectedDay;
+    html += `<button class="day-tab${isActive?' active':''}${hasData?' has-data':''}" onclick="selectDay('${key}')">
+      <span class="day-name">${DAYS_SHORT[d.getDay()]}</span>
+      <span class="day-num">${d.getDate()}</span>
+      <span class="dot"></span>
+    </button>`;
+  }
+  container.innerHTML = html;
+}
+
+function selectDay(key) {
+  selectedDay = key;
+  renderDayTabs();
+  renderDayContent();
+}
+
+function renderDayContent() {
+  const allData = loadLocal();
+  const dayData = allData[selectedDay] || { listening: '', readingTime: '', graded: [''], choice: [''], mood: '', note: '' };
+  const stage = getStage();
+  const recent = getRecentBooks();
+  const today = todayKey();
+  const isToday = selectedDay === today;
+
+  // Filter out books already added today from recent list
+  const todayBooks = [...(dayData.graded||[]), ...(dayData.choice||[])].map(b => (b||'').trim()).filter(Boolean);
+  const availableRecent = recent.filter(b => !todayBooks.includes(b));
+
+  const listeningVal = parseInt(dayData.listening) || 0;
+  const readingVal = parseInt(dayData.readingTime) || 0;
+
+  const main = document.getElementById('mainContent');
+  main.innerHTML = `
+    <!-- Stage -->
+    <div class="stage-banner">
+      <span class="stage-badge" style="background:${stage.color}">${stage.name}</span>
+      <span>${stage.months} · 分级2-3本 + 自选1-2本 · 磨耳朵30min</span>
+    </div>
+
+    <!-- Time -->
+    <div class="time-section">
+      <div class="time-card" style="border-color: ${listeningVal ? 'var(--primary-light)' : 'transparent'}">
+        <div class="time-icon">🔊</div>
+        <div class="time-label">磨耳朵</div>
+        <div class="time-value">${listeningVal}<span class="time-unit">min</span></div>
+        <div class="time-presets">
+          <button class="time-preset add" onclick="adjustTime('${selectedDay}','listening',5)">+5</button>
+          <button class="time-preset add" onclick="adjustTime('${selectedDay}','listening',15)">+15</button>
+          <button class="time-preset add" onclick="adjustTime('${selectedDay}','listening',30)">+30</button>
+          <button class="time-preset sub" onclick="adjustTime('${selectedDay}','listening',-5)">-5</button>
+          <button class="time-preset set" onclick="setTime('${selectedDay}','listening')">✏️</button>
+        </div>
+      </div>
+      <div class="time-card" style="border-color: ${readingVal ? 'var(--accent-light)' : 'transparent'}">
+        <div class="time-icon">📖</div>
+        <div class="time-label">带读</div>
+        <div class="time-value">${readingVal}<span class="time-unit">min</span></div>
+        <div class="time-presets">
+          <button class="time-preset add" onclick="adjustTime('${selectedDay}','readingTime',5)">+5</button>
+          <button class="time-preset add" onclick="adjustTime('${selectedDay}','readingTime',15)">+15</button>
+          <button class="time-preset add" onclick="adjustTime('${selectedDay}','readingTime',30)">+30</button>
+          <button class="time-preset sub" onclick="adjustTime('${selectedDay}','readingTime',-5)">-5</button>
+          <button class="time-preset set" onclick="setTime('${selectedDay}','readingTime')">✏️</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Graded Books -->
+    <div class="section">
+      <div class="section-header">
+        <div class="section-title"><span class="emoji">📚</span>分级阅读</div>
+        <div class="section-count">${dayData.graded.filter(b=>b&&b.trim()).length} 本</div>
+      </div>
+      <div class="book-chips" id="gradedChips">
+        ${dayData.graded.filter(b=>b&&b.trim()).map((b,i) =>
+          `<span class="book-chip graded">${b}<button class="del" onclick="delBook('${selectedDay}','graded',${i})">✕</button></span>`
+        ).join('') || '<div class="empty-hint">点击下方添加分级书</div>'}
+      </div>
+      <div class="add-book-row">
+        <input class="add-book-input graded" id="gradedInput" placeholder="输入分级书名..." onkeydown="if(event.key==='Enter')addBookFromInput('${selectedDay}','graded')">
+        <button class="add-book-btn graded" onclick="addBookFromInput('${selectedDay}','graded')">添加</button>
+      </div>
+      ${availableRecent.length ? `<div class="recent-books">${availableRecent.slice(0,8).map(b =>
+        `<button class="recent-chip" onclick="quickAddBook('${selectedDay}','graded','${b.replace(/'/g,"\\'")}')">${b}</button>`
+      ).join('')}</div>` : ''}
+    </div>
+
+    <!-- Choice Books -->
+    <div class="section">
+      <div class="section-header">
+        <div class="section-title"><span class="emoji">🎨</span>自选绘本</div>
+        <div class="section-count">${dayData.choice.filter(b=>b&&b.trim()).length} 本</div>
+      </div>
+      <div class="book-chips" id="choiceChips">
+        ${dayData.choice.filter(b=>b&&b.trim()).map((b,i) =>
+          `<span class="book-chip choice">${b}<button class="del" onclick="delBook('${selectedDay}','choice',${i})">✕</button></span>`
+        ).join('') || '<div class="empty-hint">Leo 自己选的书</div>'}
+      </div>
+      <div class="add-book-row">
+        <input class="add-book-input choice" id="choiceInput" placeholder="输入自选书名..." onkeydown="if(event.key==='Enter')addBookFromInput('${selectedDay}','choice')">
+        <button class="add-book-btn choice" onclick="addBookFromInput('${selectedDay}','choice')">添加</button>
+      </div>
+      ${availableRecent.length ? `<div class="recent-books">${availableRecent.slice(0,8).map(b =>
+        `<button class="recent-chip" onclick="quickAddBook('${selectedDay}','choice','${b.replace(/'/g,"\\'")}')">${b}</button>`
+      ).join('')}</div>` : ''}
+    </div>
+
+    <!-- Mood -->
+    <div class="section mood-section">
+      <div class="section-header">
+        <div class="section-title"><span class="emoji">😊</span>Leo 今天的心情</div>
+      </div>
+      <div class="mood-row">
+        ${['😄','😐','😴'].map(m =>
+          `<button class="mood-btn${dayData.mood===m?' active':''}" onclick="setMood('${selectedDay}','${m}')">${m}</button>`
+        ).join('')}
+      </div>
+    </div>
+
+    <!-- Note -->
+    <div class="section note-section">
+      <div class="section-header">
+        <div class="section-title"><span class="emoji">📝</span>备注</div>
+      </div>
+      <input class="note-input" id="noteInput" value="${dayData.note||''}" placeholder="今天的情况..." oninput="handleNoteInput(this)">
+    </div>
+  `;
+}
+
+/* ===== Data Operations ===== */
+function adjustTime(key, field, delta) {
+  const data = loadLocal();
+  if (!data[key]) data[key] = { listening: '', readingTime: '', graded: [''], choice: [''], mood: '', note: '' };
+  const cur = parseInt(data[key][field]) || 0;
+  data[key][field] = String(Math.max(0, Math.min(180, cur + delta)));
+  saveLocal(data);
+  renderDayContent();
+  cloudSync(key, data[key]);
+}
+
+function setTime(key, field) {
+  const data = loadLocal();
+  if (!data[key]) data[key] = { listening: '', readingTime: '', graded: [''], choice: [''], mood: '', note: '' };
+  const cur = parseInt(data[key][field]) || 0;
+  const val = prompt(`设置${field==='listening'?'磨耳朵':'带读'}时间（分钟）:`, cur);
+  if (val === null) return;
+  data[key][field] = String(Math.max(0, Math.min(180, parseInt(val) || 0)));
+  saveLocal(data);
+  renderDayContent();
+  cloudSync(key, data[key]);
+}
+
+function addBookFromInput(key, type) {
+  const input = document.getElementById(type + 'Input');
+  if (!input || !input.value.trim()) return;
+  const name = input.value.trim();
+  const data = loadLocal();
+  if (!data[key]) data[key] = { listening: '', readingTime: '', graded: [''], choice: [''], mood: '', note: '' };
+  // Remove empty entries, add new book
+  data[key][type] = data[key][type].filter(b => b && b.trim());
+  data[key][type].push(name);
+  if (data[key][type].length === 0) data[key][type] = [name];
+  saveLocal(data);
+  addRecentBook(name);
+  renderDayContent();
+  cloudSync(key, data[key]);
+}
+
+function quickAddBook(key, type, name) {
+  const data = loadLocal();
+  if (!data[key]) data[key] = { listening: '', readingTime: '', graded: [''], choice: [''], mood: '', note: '' };
+  data[key][type] = data[key][type].filter(b => b && b.trim());
+  data[key][type].push(name);
+  saveLocal(data);
+  addRecentBook(name);
+  renderDayContent();
+  cloudSync(key, data[key]);
+}
+
+function delBook(key, type, idx) {
+  const data = loadLocal();
+  if (!data[key]) return;
+  const filled = data[key][type].filter(b => b && b.trim());
+  if (idx < filled.length) {
+    const toRemove = filled[idx];
+    data[key][type] = data[key][type].filter(b => b !== toRemove);
+  }
+  if (data[key][type].length === 0) data[key][type] = [''];
+  saveLocal(data);
+  renderDayContent();
+  cloudSync(key, data[key]);
+}
+
+function setMood(key, mood) {
+  const data = loadLocal();
+  if (!data[key]) data[key] = { listening: '', readingTime: '', graded: [''], choice: [''], mood: '', note: '' };
+  data[key].mood = data[key].mood === mood ? '' : mood;
+  saveLocal(data);
+  renderDayContent();
+  cloudSync(key, data[key]);
+}
+
+let noteTimer = null;
+function handleNoteInput(el) {
+  clearTimeout(noteTimer);
+  noteTimer = setTimeout(() => {
+    const key = selectedDay;
+    const data = loadLocal();
+    if (!data[key]) data[key] = { listening: '', readingTime: '', graded: [''], choice: [''], mood: '', note: '' };
+    data[key].note = el.value;
+    saveLocal(data);
+    cloudSync(key, data[key]);
+  }, 400);
+}
+
+/* ===== View Switching ===== */
+function switchView(view) {
+  currentView = view;
+  const mainEl = document.getElementById('mainContent');
+  const dayTabsEl = document.getElementById('dayTabs');
+  const dashEl = document.getElementById('dashboard');
+  const tabTracker = document.getElementById('tabTracker');
+  const tabDashboard = document.getElementById('tabDashboard');
+  const headerNav = document.getElementById('headerNav');
+
+  if (view === 'tracker') {
+    mainEl.classList.remove('hidden'); dayTabsEl.classList.remove('hidden');
+    dashEl.classList.remove('active');
+    tabTracker.classList.add('active'); tabDashboard.classList.remove('active');
+    // Restore week nav in header
+    headerNav.innerHTML = `
+      <button onclick="changeWeek(-1)">◀</button>
+      <span id="weekLabel" class="week-label"></span>
+      <button onclick="changeWeek(1)">▶</button>
+    `;
+    renderWeekNav();
+  } else {
+    mainEl.classList.add('hidden'); dayTabsEl.classList.add('hidden');
+    dashEl.classList.add('active');
+    tabTracker.classList.remove('active'); tabDashboard.classList.add('active');
+    // Replace header nav with dashboard period nav
+    const periods = [
+      { key: 'week', label: '周' }, { key: 'month', label: '月' },
+      { key: 'quarter', label: '季' }, { key: 'year', label: '年' }
+    ];
+    headerNav.innerHTML = `
+      <button onclick="navDash(-1)">◀</button>
+      <span class="week-label">${formatPeriodLabel(dashPeriod, dashDate)}</span>
+      <button onclick="navDash(1)">▶</button>
+    `;
+    renderDashboard();
+  }
+}
+
+/* ===== Dashboard Period Helpers ===== */
+function getPeriodRange(period, refDate) {
+  const d = new Date(refDate);
+  let start, end;
+  if (period === 'week') {
+    start = getMonday(d); end = new Date(start); end.setDate(end.getDate() + 6);
+  } else if (period === 'month') {
+    start = new Date(d.getFullYear(), d.getMonth(), 1);
+    end = new Date(d.getFullYear(), d.getMonth() + 1, 0);
+  } else if (period === 'quarter') {
+    const q = Math.floor(d.getMonth() / 3);
+    start = new Date(d.getFullYear(), q * 3, 1);
+    end = new Date(d.getFullYear(), q * 3 + 3, 0);
+  } else { // year
+    start = new Date(d.getFullYear(), 0, 1);
+    end = new Date(d.getFullYear(), 11, 31);
+  }
+  start.setHours(0,0,0,0); end.setHours(23,59,59,999);
+  return { start, end };
+}
+
+function shiftPeriod(period, refDate, dir) {
+  const d = new Date(refDate);
+  if (period === 'week') d.setDate(d.getDate() + dir * 7);
+  else if (period === 'month') d.setMonth(d.getMonth() + dir);
+  else if (period === 'quarter') d.setMonth(d.getMonth() + dir * 3);
+  else d.setFullYear(d.getFullYear() + dir);
+  return d;
+}
+
+function formatPeriodLabel(period, refDate) {
+  const d = new Date(refDate);
+  const range = getPeriodRange(period, d);
+  const s = range.start, e = range.end;
+  if (period === 'week') return `${s.getMonth()+1}月${s.getDate()}日 — ${e.getMonth()+1}月${e.getDate()}日`;
+  if (period === 'month') return `${s.getFullYear()}年${s.getMonth()+1}月`;
+  if (period === 'quarter') {
+    const q = Math.floor(s.getMonth() / 3) + 1;
+    return `${s.getFullYear()}年 Q${q}`;
+  }
+  return `${d.getFullYear()}年`;
+}
+
+/* ===== Fetch dashboard data from cloud ===== */
+async function fetchPeriodData(period, refDate) {
+  const range = getPeriodRange(period, refDate);
+  const { data, error } = await db.from('reading_records')
+    .select('*')
+    .gte('date', fmtKey(range.start))
+    .lte('date', fmtKey(range.end))
+    .order('date', { ascending: true });
+  if (error) throw error;
+  return data || [];
+}
+
+/* ===== Compute stats from records ===== */
+function computeStats(records) {
+  let totalListening = 0, totalReading = 0, totalGraded = 0, totalChoice = 0;
+  let daysWithData = 0;
+  const bookFreq = {}; // bookName -> { count, type: 'graded'|'choice'|'both' }
+  const moodCounts = { '😄': 0, '😐': 0, '😴': 0 };
+  const dailyActivity = []; // { date, listening, reading }
+
+  records.forEach(r => {
+    const listening = parseInt(r.listening) || 0;
+    const reading = parseInt(r.reading_time) || 0;
+    const gradedBooks = (r.graded || []).filter(b => b && b.trim());
+    const choiceBooks = (r.choice || []).filter(b => b && b.trim());
+
+    totalListening += listening;
+    totalReading += reading;
+    totalGraded += gradedBooks.length;
+    totalChoice += choiceBooks.length;
+    if (listening || reading || gradedBooks.length || choiceBooks.length) daysWithData++;
+
+    gradedBooks.forEach(b => {
+      if (!bookFreq[b]) bookFreq[b] = { count: 0, type: 'graded' };
+      bookFreq[b].count++;
+      if (bookFreq[b].type !== 'graded') bookFreq[b].type = 'both';
+    });
+    choiceBooks.forEach(b => {
+      if (!bookFreq[b]) bookFreq[b] = { count: 0, type: 'choice' };
+      bookFreq[b].count++;
+      if (bookFreq[b].type !== 'choice') bookFreq[b].type = 'both';
+    });
+
+    if (r.mood && moodCounts.hasOwnProperty(r.mood)) moodCounts[r.mood]++;
+    dailyActivity.push({ date: r.date, listening, reading });
+  });
+
+  // Sort by frequency
+  const bookList = Object.entries(bookFreq)
+    .map(([name, info]) => ({ name, count: info.count, type: info.type }))
+    .sort((a, b) => b.count - a.count);
+
+  const totalMins = totalListening + totalReading;
+
+  // Calculate streak
+  const dateSet = new Set(records.filter(r => {
+    const listening = parseInt(r.listening) || 0;
+    const reading = parseInt(r.reading_time) || 0;
+    const gradedBooks = (r.graded || []).filter(b => b && b.trim());
+    const choiceBooks = (r.choice || []).filter(b => b && b.trim());
+    return listening || reading || gradedBooks.length || choiceBooks.length;
+  }).map(r => r.date));
+
+  let streak = 0;
+  const today = new Date(); today.setHours(0,0,0,0);
+  let checkDate = new Date(today);
+  // If today has no data, start from yesterday
+  if (!dateSet.has(fmtKey(checkDate))) {
+    checkDate.setDate(checkDate.getDate() - 1);
+  }
+  while (dateSet.has(fmtKey(checkDate))) {
+    streak++;
+    checkDate.setDate(checkDate.getDate() - 1);
+  }
+
+  return {
+    totalListening, totalReading, totalGraded, totalChoice,
+    totalMins, daysWithData, bookList, moodCounts, dailyActivity, streak
+  };
+}
+
+/* ===== Render Dashboard ===== */
+async function renderDashboard() {
+  const dashEl = document.getElementById('dashboard');
+  dashEl.innerHTML = `<div style="text-align:center;padding:40px;color:var(--text-tertiary)">⟳ 加载中...</div>`;
+
+  // Update header nav with period label
+  const headerNav = document.getElementById('headerNav');
+  if (headerNav && currentView === 'dashboard') {
+    headerNav.innerHTML = `
+      <button onclick="navDash(-1)">◀</button>
+      <span class="week-label">${formatPeriodLabel(dashPeriod, dashDate)}</span>
+      <button onclick="navDash(1)">▶</button>
+    `;
+  }
+
+  let records;
+  try {
+    records = await fetchPeriodData(dashPeriod, dashDate);
+  } catch (e) {
+    console.error(e);
+    dashEl.innerHTML = `<div style="text-align:center;padding:40px;color:var(--red)">✗ 数据加载失败</div>`;
+    return;
+  }
+
+  // Also merge local data for current period
+  const range = getPeriodRange(dashPeriod, dashDate);
+  const local = loadLocal();
+  const localRecords = [];
+  for (let d = new Date(range.start); d <= range.end; d.setDate(d.getDate() + 1)) {
+    const key = fmtKey(d);
+    if (local[key]) {
+      const dd = local[key];
+      const exists = records.some(r => r.date === key);
+      if (!exists) {
+        localRecords.push({
+          date: key, listening: parseInt(dd.listening) || 0,
+          reading_time: parseInt(dd.readingTime) || 0,
+          graded: dd.graded || [], choice: dd.choice || [],
+          mood: dd.mood || '', note: dd.note || ''
+        });
+      }
+    }
+  }
+  const allRecords = [...records, ...localRecords].sort((a, b) => a.date.localeCompare(b.date));
+
+  const stats = computeStats(allRecords);
+  const totalBooks = stats.totalGraded + stats.totalChoice;
+  const chartData = buildChartData(dashPeriod, dashDate, stats.dailyActivity);
+  const moodTotal = Object.values(stats.moodCounts).reduce((s, v) => s + v, 0);
+
+  const periods = [
+    { key: 'week', label: '周' }, { key: 'month', label: '月' },
+    { key: 'quarter', label: '季' }, { key: 'year', label: '年' }
+  ];
+
+  dashEl.innerHTML = `
+    <!-- Period Tabs -->
+    <div class="dash-period-tabs">
+      ${periods.map(p => `<button class="dash-period-tab${dashPeriod===p.key?' active':''}" onclick="setDashPeriod('${p.key}')">${p.label}</button>`).join('')}
+    </div>
+
+    <!-- Streak -->
+    ${stats.streak > 0 ? `
+    <div class="streak-card">
+      <div>🔥</div>
+      <div>
+        <div class="streak-num">${stats.streak}</div>
+        <div class="streak-label">天连续打卡</div>
+      </div>
+      <div style="flex:1"></div>
+      <div style="text-align:right">
+        <div style="font-size:18px;font-weight:700">${(stats.totalMins/60).toFixed(1)}h</div>
+        <div class="streak-detail">累计投入</div>
+      </div>
+    </div>` : ''}
+
+    <!-- Summary Stats -->
+    <div class="dash-summary">
+      <div class="dash-stat">
+        <div class="icon">📚</div>
+        <div class="val" style="color:var(--primary)">${totalBooks}<span class="unit">本</span></div>
+        <div class="lbl">阅读总量</div>
+      </div>
+      <div class="dash-stat">
+        <div class="icon">📖</div>
+        <div class="val" style="color:var(--accent)">${stats.daysWithData}<span class="unit">天</span></div>
+        <div class="lbl">阅读天数</div>
+      </div>
+      <div class="dash-stat">
+        <div class="icon">🔊</div>
+        <div class="val" style="color:var(--primary)">${stats.totalListening >= 60 ? (stats.totalListening/60).toFixed(1)+'<span class="unit">h</span>' : stats.totalListening+'<span class="unit">min</span>'}</div>
+        <div class="lbl">磨耳朵</div>
+      </div>
+      <div class="dash-stat">
+        <div class="icon">📕</div>
+        <div class="val" style="color:var(--accent)">${stats.totalReading >= 60 ? (stats.totalReading/60).toFixed(1)+'<span class="unit">h</span>' : stats.totalReading+'<span class="unit">min</span>'}</div>
+        <div class="lbl">带读</div>
+      </div>
+    </div>
+
+    <!-- Activity Chart -->
+    ${chartData.length > 0 ? `
+    <div class="dash-section">
+      <div class="dash-section-title">📊 阅读时长趋势</div>
+      <div class="activity-chart">
+        ${chartData.map(c => `
+          <div class="activity-bar-wrap">
+            <div class="activity-bar-container">
+              <div style="display:flex;flex-direction:column;gap:1px;width:100%;align-items:center;justify-content:flex-end;height:100%">
+                <div class="activity-bar listening" style="height:${c.listeningPct}%"></div>
+                <div class="activity-bar reading" style="height:${c.readingPct}%"></div>
+              </div>
+            </div>
+            <div class="activity-bar-label">${c.label}</div>
+          </div>
+        `).join('')}
+      </div>
+      <div class="activity-legend">
+        <span><span class="legend-dot" style="background:var(--primary)"></span>磨耳朵</span>
+        <span><span class="legend-dot" style="background:var(--accent)"></span>带读</span>
+      </div>
+    </div>` : ''}
+
+    <!-- Book Frequency -->
+    ${stats.bookList.length > 0 ? `
+    <div class="dash-section">
+      <div class="dash-section-title">📖 书目排行 · 共${stats.bookList.length}本</div>
+      ${stats.bookList.slice(0, 20).map((b, i) => {
+        const maxCount = stats.bookList[0].count;
+        const pct = Math.round(b.count / maxCount * 100);
+        const rankCls = i === 0 ? 'top1' : i === 1 ? 'top2' : i === 2 ? 'top3' : 'normal';
+        const typeIcon = b.type === 'graded' ? '📚' : b.type === 'choice' ? '🎨' : '📚🎨';
+        return `<div class="book-freq-item">
+          <div class="book-freq-rank ${rankCls}">${i+1}</div>
+          <div class="book-freq-name">${b.name} <span style="font-size:10px">${typeIcon}</span></div>
+          <div class="book-freq-bar-bg"><div class="book-freq-bar" style="width:${pct}%"></div></div>
+          <div class="book-freq-count">${b.count}次</div>
+        </div>`;
+      }).join('')}
+    </div>` : `
+    <div class="dash-section" style="text-align:center;padding:32px">
+      <div style="font-size:32px;margin-bottom:8px">📖</div>
+      <div style="color:var(--text-tertiary);font-size:13px">这个时段还没有阅读记录</div>
+    </div>`}
+
+    <!-- Mood Distribution -->
+    ${moodTotal > 0 ? `
+    <div class="dash-section">
+      <div class="dash-section-title">😊 心情分布</div>
+      <div class="mood-dist">
+        ${Object.entries(stats.moodCounts).map(([emoji, count]) => {
+          const pct = moodTotal > 0 ? Math.round(count / moodTotal * 100) : 0;
+          const labels = {'😄':'开心','😐':'一般','😴':'犯困'};
+          return `<div class="mood-dist-item">
+            <div class="mood-dist-emoji">${emoji}</div>
+            <div class="mood-dist-pct">${pct}%</div>
+            <div class="mood-dist-lbl">${labels[emoji]||''}</div>
+          </div>`;
+        }).join('')}
+      </div>
+    </div>` : ''}
+  `;
+}
+
+function buildChartData(period, refDate, dailyActivity) {
+  const range = getPeriodRange(period, refDate);
+  const activityMap = {};
+  dailyActivity.forEach(d => activityMap[d.date] = d);
+
+  const items = [];
+
+  if (period === 'week') {
+    const maxMins = Math.max(1, ...dailyActivity.map(d => d.listening + d.reading));
+    for (let i = 0; i < 7; i++) {
+      const d = new Date(range.start); d.setDate(d.getDate() + i);
+      const key = fmtKey(d);
+      const act = activityMap[key] || { listening: 0, reading: 0 };
+      items.push({
+        label: DAYS_SHORT[d.getDay()],
+        listeningPct: Math.round(act.listening / maxMins * 100),
+        readingPct: Math.round(act.reading / maxMins * 100)
+      });
+    }
+  } else if (period === 'month') {
+    const daysInMonth = new Date(range.start.getFullYear(), range.start.getMonth() + 1, 0).getDate();
+    for (let w = 0; w < 5; w++) {
+      let wListening = 0, wReading = 0;
+      const startDay = w * 7 + 1;
+      const endDay = Math.min(startDay + 6, daysInMonth);
+      if (startDay > daysInMonth) break;
+      for (let day = startDay; day <= endDay; day++) {
+        const d = new Date(range.start.getFullYear(), range.start.getMonth(), day);
+        const key = fmtKey(d);
+        const act = activityMap[key] || { listening: 0, reading: 0 };
+        wListening += act.listening; wReading += act.reading;
+      }
+      items.push({ label: `W${w+1}`, rawL: wListening, rawR: wReading });
+    }
+    const maxMins = Math.max(1, ...items.map(i => i.rawL + i.rawR));
+    items.forEach(i => { i.listeningPct = Math.round(i.rawL / maxMins * 100); i.readingPct = Math.round(i.rawR / maxMins * 100); });
+  } else if (period === 'quarter') {
+    for (let m = 0; m < 3; m++) {
+      let mListening = 0, mReading = 0;
+      const mStart = new Date(range.start.getFullYear(), range.start.getMonth() + m, 1);
+      const mEnd = new Date(range.start.getFullYear(), range.start.getMonth() + m + 1, 0);
+      dailyActivity.forEach(d => {
+        const dd = new Date(d.date);
+        if (dd >= mStart && dd <= mEnd) { mListening += d.listening; mReading += d.reading; }
+      });
+      items.push({ label: `${mStart.getMonth()+1}月`, rawL: mListening, rawR: mReading });
+    }
+    const maxMins = Math.max(1, ...items.map(i => i.rawL + i.rawR));
+    items.forEach(i => { i.listeningPct = Math.round(i.rawL / maxMins * 100); i.readingPct = Math.round(i.rawR / maxMins * 100); });
+  } else { // year
+    for (let m = 0; m < 12; m++) {
+      let mListening = 0, mReading = 0;
+      const mStart = new Date(range.start.getFullYear(), m, 1);
+      const mEnd = new Date(range.start.getFullYear(), m + 1, 0);
+      dailyActivity.forEach(d => {
+        const dd = new Date(d.date);
+        if (dd >= mStart && dd <= mEnd) { mListening += d.listening; mReading += d.reading; }
+      });
+      items.push({ label: `${m+1}月`, rawL: mListening, rawR: mReading });
+    }
+    const maxMins = Math.max(1, ...items.map(i => i.rawL + i.rawR));
+    items.forEach(i => { i.listeningPct = Math.round(i.rawL / maxMins * 100); i.readingPct = Math.round(i.rawR / maxMins * 100); });
+  }
+  return items;
+}
+
+function setDashPeriod(period) {
+  dashPeriod = period;
+  dashDate = new Date();
+  renderDashboard();
+}
+
+function navDash(dir) {
+  dashDate = shiftPeriod(dashPeriod, dashDate, dir);
+  renderDashboard();
+}
+
+/* ===== Init ===== */
+(async function init() {
+  await migrateLocalToCloud().catch(e => console.warn('迁移:', e));
+  render();
+})();
+</script>
+</body>
+</html>
